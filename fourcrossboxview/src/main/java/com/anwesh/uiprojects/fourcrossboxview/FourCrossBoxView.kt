@@ -21,6 +21,8 @@ val strokeFactor : Int = 90
 val sizeFactor : Float = 2.9f
 val foreColor : Int = Color.parseColor("#0D47A1")
 val backColor : Int = Color.parseColor("#BDBDBD")
+val parts : Int = 2
+val delay : Long = 20
 
 fun Int.inverse() : Float = 1f / this
 fun Float.scaleFactor() : Float = Math.floor(this / scDiv).toFloat()
@@ -33,14 +35,14 @@ fun Float.mirrorValue(a : Int, b : Int) : Float {
 fun Float.updateValue(dir : Float, a : Int, b : Int) : Float = mirrorValue(a, b) * dir * scGap
 
 fun Canvas.drawCrossBox(i : Int, size : Float, sc : Float, paint : Paint) {
-    val sc1 : Float = sc.divideScale(0, 2)
-    val sc2 : Float = sc.divideScale(1, 2)
+    val sc1 : Float = sc.divideScale(0, parts)
+    val sc2 : Float = sc.divideScale(1, parts)
     val a : Float = size / 2
     val b : Float = a * sc1
     val c : Float = 2 * size * sc2
     save()
     rotate(90f * i)
-    drawLine(a, a, a + b, a + b, paint)
+    drawLine(a, -a, a + b, -a - b, paint)
     drawLine(size, -size, size, -size + c, paint)
     restore()
 }
@@ -55,6 +57,7 @@ fun Canvas.drawFCBNode(i : Int, scale : Float, paint : Paint) {
     paint.color = foreColor
     paint.strokeWidth = Math.min(w, h) / strokeFactor
     paint.style = Paint.Style.STROKE
+    paint.strokeCap = Paint.Cap.ROUND
     save()
     translate(w / 2, gap * (i + 1))
     rotate(90f * sc2)
@@ -86,7 +89,7 @@ class FourCrossBoxView(ctx : Context) : View(ctx) {
     data class State(var scale : Float = 0f, var dir : Float = 0f, var prevScale : Float = 0f) {
 
         fun update(cb : (Float) -> Unit) {
-            scale += scale.updateValue(dir, lines, 1)
+            scale += scale.updateValue(dir, lines * parts, 1)
             if (Math.abs(scale - prevScale) > 1) {
                 scale = prevScale + dir
                 dir = 0f
@@ -109,7 +112,7 @@ class FourCrossBoxView(ctx : Context) : View(ctx) {
             if (animated) {
                 cb()
                 try {
-                    Thread.sleep(50)
+                    Thread.sleep(delay)
                     view.invalidate()
                 } catch(ex : Exception) {
 
