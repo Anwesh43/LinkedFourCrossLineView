@@ -197,4 +197,26 @@ class FourCrossBoxView(ctx : Context) : View(ctx) {
             curr.startUpdating(cb)
         }
     }
+
+    data class Renderer(var view : FourCrossBoxView) {
+
+        private val animator : Animator = Animator(view)
+        private val fcb : FourCrossBox = FourCrossBox(0)
+
+        fun render(canvas : Canvas, paint : Paint) {
+            canvas.drawColor(backColor)
+            fcb.draw(canvas, paint)
+            animator.animate {
+                fcb.update {i, scl ->
+                    animator.stop()
+                }
+            }
+        }
+
+        fun handleTap() {
+            fcb.startUpdating {
+                animator.start()
+            }
+        }
+    }
 }
