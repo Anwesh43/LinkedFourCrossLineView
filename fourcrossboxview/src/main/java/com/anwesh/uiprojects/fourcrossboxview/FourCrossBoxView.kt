@@ -220,4 +220,13 @@ class FourCrossBoxView(ctx : Context) : View(ctx) {
             }
         }
     }
+
+    companion object {
+
+        fun create(activity : Activity) : FourCrossBoxView {
+            val view : FourCrossBoxView = FourCrossBoxView(activity)
+            activity.setContentView(view)
+            return view
+        }
+    }
 }
