@@ -45,7 +45,7 @@ fun Canvas.drawCrossBox(i : Int, size : Float, sc : Float, paint : Paint) {
     restore()
 }
 
-fun Canvas.drawCBNode(i : Int, scale : Float, paint : Paint) {
+fun Canvas.drawFCBNode(i : Int, scale : Float, paint : Paint) {
     val w : Float = width.toFloat()
     val h : Float = height.toFloat()
     val gap : Float = h / (nodes + 1)
@@ -125,8 +125,52 @@ class FourCrossBoxView(ctx : Context) : View(ctx) {
 
         fun stop() {
             if (animated) {
-                animated = false 
+                animated = false
             }
+        }
+    }
+
+    data class FCBNode(var i : Int, val state : State = State()) {
+
+        private var prev : FCBNode? = null
+        private var next : FCBNode? = null
+
+        init {
+            addNeighbor()
+        }
+
+        fun addNeighbor() {
+            if (i < nodes - 1) {
+                next = FCBNode(i + 1)
+                next?.prev = this
+            }
+        }
+
+        fun draw(canvas : Canvas, paint : Paint) {
+            canvas.drawFCBNode(i, state.scale, paint)
+            next?.draw(canvas, paint)
+        }
+
+        fun update(cb : (Int, Float) -> Unit) {
+            state.update {
+                cb(i, it)
+            }
+        }
+
+        fun startUpdating(cb : () -> Unit) {
+            state.startUpdating(cb)
+        }
+
+        fun getNext(dir : Int, cb : () -> Unit) : FCBNode {
+            var curr : FCBNode? = prev
+            if (dir == 1) {
+                curr = next
+            }
+            if (curr != null) {
+                return curr
+            }
+            cb()
+            return this
         }
     }
 }
